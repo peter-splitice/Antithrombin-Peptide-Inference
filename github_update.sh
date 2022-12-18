@@ -13,10 +13,11 @@ git add README.md
 git add main.py
 git add inference.py
 git add pipeline.py
+git add inference_with_hits.py
 
 # Jupyter Notebooks
-git add inference_with_hits.ipynb
-git add inference.ipynb
+git add Inference_with_hits.ipynb
+git add Inference.ipynb
 git add 'Positive Hits.ipynb'
 
 # Bash Scripts
@@ -28,6 +29,8 @@ git add smallhits.fasta
 
 # .csv files
 git add combined_hits.csv
+git add single_results.csv
+git add sorted_peptides.csv
 
 # .fai files
 git add longhits.fasta.fai
