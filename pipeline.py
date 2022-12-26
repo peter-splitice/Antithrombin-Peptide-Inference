@@ -7,6 +7,9 @@ import pickle
 import pandas as pd
 import numpy as np 
 
+# Change this global variable depending on what variance we choose for PCA.  Set this to 'False' if we don't end up using PCA.
+VARIANCE = 90
+
 ## Pipeline for multi-stage model:
 def model_pipeline(allFeaturesData, ensemble=bool):
     """
@@ -50,20 +53,21 @@ def model_pipeline(allFeaturesData, ensemble=bool):
         scaler_for_regression = pickle.load(fh)
 
     # Classification with ki
-    with open('Regression Dependencies/SVC RBF bucket Classification trained.pkl', 'rb') as fh:
+    with open('Regression Dependencies/SVC with Linear Kernel trained model (rfe).pkl', 'rb') as fh:    # changed this
         classification_model_for_buckets = pickle.load(fh)
 
     # Regression for Medium Bucket
-    with open('Regression Dependencies/SVR RBF medium bucket Regression trained.pkl', 'rb') as fh:
+    with open('Regression Dependencies/Lasso Regression trained model medium bucket (rfe).pkl', 'rb') as fh:    # changed this
         regression_model_medium_bucket = pickle.load(fh)
 
     # Regression for Small Bucket
-    with open('Regression Dependencies/SVR RBF small bucket Regression trained.pkl', 'rb') as fh:
+    with open('Regression Dependencies/Lasso Regression trained model small bucket (rfe).pkl', 'rb') as fh:     # changed this
         regression_model_small_bucket = pickle.load(fh)
 
     # Selected features Regression
-    with open('Regression Dependencies/Features for Regression Model.json') as fh:
+    with open('Regression Dependencies/rfe_selected_features.json') as fh:      # Changed this to 'rfe selected features'
         regression_features = json.loads(fh.read())
+
 
     ### CLASSIFICATION
     # ----------------------------------
@@ -118,6 +122,21 @@ def model_pipeline(allFeaturesData, ensemble=bool):
     # Apply preprocessing function and select only necessary features
     reg_data_reduced = pd.DataFrame(scaler_for_regression.transform(reg_data.iloc[:,2:-1]), 
                                                         columns = reg_data.columns[2:-1])[regression_features]
+
+    # Apply PCA if applicable
+    if VARIANCE != False:
+        with open('Regression Dependencies/SVC with Linear Kernel 10.00 rfe-pca.pkl', 'rb') as fh:
+            pca = pickle.load(fh)
+        reg_data_reduced = pd.DataFrame(pca.transform(reg_data_reduced))
+
+        # Dimensionality Reduction based on accepted variance.
+        ratios = np.array(pca.explained_variance_ratio_)
+        ratios = ratios[ratios.cumsum() <= (VARIANCE/100)]
+
+        # Readjust the dimensions of 'reg_data_reduced' based on the variance we want.
+        length = len(ratios)
+        if length > 0:
+            reg_data_reduced = reg_data_reduced[reg_data_reduced.columns[0:length]]
 
     # Predict the buckets.
     buckets_pred = classification_model_for_buckets.predict(reg_data_reduced)
