@@ -30,4 +30,14 @@
     2. Created a github repo for this project
 
 #### 12/26/2022 (Peter)
-
+    1. Updated "pipeline.py"
+        a. Changed the features included and models used to be the RFE models (see below).
+        b. Added functionality for PCA in the model pipeline.
+        c. Added global variable "VARIANCE" that is used to determine how many principal components to select.
+            - This current version uses 90% variance.
+    2. Updated "Regression Dependencies" wit the following (did not remove old models and dependencies):
+        a. Added "Lasso Regression trained model medium bucket (rfe).pkl"
+        b. Added "Lasso Regression trained model small bucket (rfe).pkl"
+        c. Added "rfe_selected_features.json"
+        d. Added "SVC with Linear Kernel 10.00 rfe-pca.pkl"
+        e. Added "SVC with Linear Kernel trained model (rfe).pkl"
