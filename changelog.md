@@ -41,3 +41,12 @@
         c. Added "rfe_selected_features.json"
         d. Added "SVC with Linear Kernel 10.00 rfe-pca.pkl"
         e. Added "SVC with Linear Kernel trained model (rfe).pkl"
+
+#### 12/29/2022 (Peter)
+    1. Updated "Regression Dependencies"
+        a. Added "SVR with Linear Kernel trained model medium bucket (rfe).pkl"
+        b. Added "SVR with Linear Kernel trained model small bucket (rfe).pkl"
+        c. Added "SVR with RBF Kernel trained model medium bucket (rfe).pkl"
+        d. Added "SVR with RBF Kernel trained model small bucket (rfe).pkl"
+    2. Updated "pipeline.py"
+        a. Added notes to the code.

@@ -48,20 +48,23 @@ def model_pipeline(allFeaturesData, ensemble=bool):
         classification_features = json.loads(fh.read())
 
     ## Regression Model Imports:
+    # Change the regression sections depending on whether or not you want to use Lasso Regression, SVR with 
+    # Linear Kernel, or SVR with RBF Kernel.
+    
     # Scaler
     with open('Regression Dependencies/Scaler Regression.pkl', 'rb') as fh:
         scaler_for_regression = pickle.load(fh)
 
     # Classification with ki
-    with open('Regression Dependencies/SVC with Linear Kernel trained model (rfe).pkl', 'rb') as fh:    # changed this
+    with open('Regression Dependencies/SVC with Linear Kernel trained model (rfe).pkl', 'rb') as fh:
         classification_model_for_buckets = pickle.load(fh)
 
     # Regression for Medium Bucket
-    with open('Regression Dependencies/Lasso Regression trained model medium bucket (rfe).pkl', 'rb') as fh:    # changed this
+    with open('Regression Dependencies/SVR with RBF Kernel trained model medium bucket (rfe).pkl', 'rb') as fh:
         regression_model_medium_bucket = pickle.load(fh)
 
     # Regression for Small Bucket
-    with open('Regression Dependencies/Lasso Regression trained model small bucket (rfe).pkl', 'rb') as fh:     # changed this
+    with open('Regression Dependencies/SVR with RBF trained model small bucket (rfe).pkl', 'rb') as fh:
         regression_model_small_bucket = pickle.load(fh)
 
     # Selected features Regression

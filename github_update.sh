@@ -39,4 +39,4 @@ git add smallhits.fasta.fai
 # .txt files
 git add requirements.txt
 
-git commit -m 'Initial Commit 12/18/2022'
+git commit -m 'Initial Commit 12/29/2022'
