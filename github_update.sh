@@ -39,4 +39,4 @@ git add smallhits.fasta.fai
 # .txt files
 git add requirements.txt
 
-git commit -m 'Initial Commit 12/29/2022'
+git commit -m 'Fixed a bug generating a Lasso file for SVR with RBF kernel (rfe) models instead of SVR.  1/2/2023'

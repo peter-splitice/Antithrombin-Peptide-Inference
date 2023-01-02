@@ -50,3 +50,6 @@
         d. Added "SVR with RBF Kernel trained model small bucket (rfe).pkl"
     2. Updated "pipeline.py"
         a. Added notes to the code.
+
+#### 1/2/2023 (Peter)
+    1. Fixed bug generating a Lasso model instead of SVR with RBF Kernel for the trained medium/small (rfe) bucket models.
