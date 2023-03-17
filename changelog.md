@@ -53,3 +53,7 @@
 
 #### 1/2/2023 (Peter)
     1. Fixed bug generating a Lasso model instead of SVR with RBF Kernel for the trained medium/small (rfe) bucket models.
+
+
+#### 3/17/2023 (Peter)
+    1. Created new branch 'reg_only_update' that has updates for the regression only pipeline.  Merge the branches once regression only section is done.
