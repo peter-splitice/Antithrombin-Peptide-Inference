@@ -3,6 +3,7 @@ git add __pycache__
 git add .ipynb_checkpoints
 git add 'Classification Dependencies'
 git add 'Regression Dependencies'
+git add 'Regression Only Dependencies'
 git add 'Results'
 
 # Markdown Files
@@ -39,4 +40,4 @@ git add smallhits.fasta.fai
 # .txt files
 git add requirements.txt
 
-git commit -m 'Fixed a bug generating a Lasso file for SVR with RBF kernel (rfe) models instead of SVR.  1/2/2023'
+git commit -m '3/17/2023 - begin making changes to the inference function to account for regression only pipeline'

@@ -71,6 +71,16 @@ def model_pipeline(allFeaturesData, ensemble=bool):
     with open('Regression Dependencies/rfe_selected_features.json') as fh:      # Changed this to 'rfe selected features'
         regression_features = json.loads(fh.read())
 
+    ## Regression Only Model Imports
+    # Imports for the regression only pipeline.
+
+    # Scaler
+    with open('Regression Only Dependencies/regression only scaler.pkl', 'rb') as fh:
+        scaler_regression_only = pickle.load(fh)
+
+    # Regression Model
+    
+
 
     ### CLASSIFICATION
     # ----------------------------------
