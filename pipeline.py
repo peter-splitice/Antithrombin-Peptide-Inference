@@ -8,7 +8,10 @@ import pandas as pd
 import numpy as np 
 
 # Change this global variable depending on what variance we choose for PCA.  Set this to 'False' if we don't end up using PCA.
-VARIANCE = 90
+REGRESSION_ONLY_VARIANCE = 90
+BUCKET_VARIANCE = 90
+KI_RANGE = (-11.330603908176274, 17.19207365866807)
+SOURCE_INTERVAL = (-5,5)
 
 ## Pipeline for multi-stage model:
 def model_pipeline(allFeaturesData, ensemble=bool):
@@ -64,23 +67,12 @@ def model_pipeline(allFeaturesData, ensemble=bool):
         regression_model_medium_bucket = pickle.load(fh)
 
     # Regression for Small Bucket
-    with open('Regression Dependencies/SVR with RBF trained model small bucket (rfe).pkl', 'rb') as fh:
+    with open('Regression Dependencies/SVR with RBF Kernel trained model small bucket (rfe).pkl', 'rb') as fh:
         regression_model_small_bucket = pickle.load(fh)
 
     # Selected features Regression
     with open('Regression Dependencies/rfe_selected_features.json') as fh:      # Changed this to 'rfe selected features'
         regression_features = json.loads(fh.read())
-
-    ## Regression Only Model Imports
-    # Imports for the regression only pipeline.
-
-    # Scaler
-    with open('Regression Only Dependencies/regression only scaler.pkl', 'rb') as fh:
-        scaler_regression_only = pickle.load(fh)
-
-    # Regression Model
-    
-
 
     ### CLASSIFICATION
     # ----------------------------------
@@ -126,47 +118,80 @@ def model_pipeline(allFeaturesData, ensemble=bool):
     # get positively predicted peptides
     reg_data = pd.DataFrame(allFeaturesData[allFeaturesData['Predicted']=='Positive'], columns = allFeaturesData.columns)
     
-    # Exception for negative peptides
+    # Exception if no peptides are predicted positive.
     if len(reg_data) == 0:
          # save result in a new dataframe
         result = allFeaturesData[['Name','Seq','Predicted']]
         return result
-        
-    # Apply preprocessing function and select only necessary features
-    reg_data_reduced = pd.DataFrame(scaler_for_regression.transform(reg_data.iloc[:,2:-1]), 
-                                                        columns = reg_data.columns[2:-1])[regression_features]
 
-    # Apply PCA if applicable
-    if VARIANCE != False:
+    y_predict_bucketed = bucket_regression_inference_pipeline(reg_data)
+    y_predict_unbucketed = regression_only_inference_pipeline(reg_data)
+
+    reg_data['KI (nM) Predicted (bucketized)'] = y_predict_bucketed
+    reg_data['KI (nM) Predicted (non-bucketized)'] = y_predict_unbucketed
+
+
+    allFeaturesData = pd.merge(allFeaturesData,reg_data[['Seq','KI (nM) Predicted', 'KI (nM) Predicted (bucketized)',
+                                                         'KI (nM) Predicted (non-bucketized)']],on='Seq', how='left')
+
+    # save result in a new dataframe
+    result = allFeaturesData[['Name','Seq','Predicted','KI (nM) Predicted', 'KI (nM) Predicted (bucketized)',
+                              'KI (nM) Predicted (non-bucketized)']]
+
+    return result
+
+def bucket_regression_inference_pipeline(reg_data=pd.DataFrame()):
+    # Scaler
+    with open('Regression Dependencies/Scaler Regression.pkl', 'rb') as fh:
+        regression_scaler = pickle.load(fh)
+
+    # Classification with ki
+    with open('Regression Dependencies/SVC with Linear Kernel trained model (rfe).pkl', 'rb') as fh:
+        bucket_classification_model = pickle.load(fh)
+
+    # Regression for Medium Bucket
+    with open('Regression Dependencies/SVR with RBF Kernel trained model medium bucket (rfe).pkl', 'rb') as fh:
+        regression_model_medium_bucket = pickle.load(fh)
+
+    # Regression for Small Bucket
+    with open('Regression Dependencies/SVR with RBF Kernel trained model small bucket (rfe).pkl', 'rb') as fh:
+        regression_model_small_bucket = pickle.load(fh)
+
+    # Selected features Regression
+    with open('Regression Dependencies/rfe_selected_features.json') as fh:      # Changed this to 'rfe selected features'
+        regression_features = json.loads(fh.read())
+
+    # Apply preprocessing function and select only necessary features
+    reg_data = pd.DataFrame(regression_scaler.transform(reg_data.iloc[:,2:-1]), 
+                                                columns = reg_data.columns[2:-1])[regression_features]
+    
+    if BUCKET_VARIANCE != False:
         with open('Regression Dependencies/SVC with Linear Kernel 10.00 rfe-pca.pkl', 'rb') as fh:
             pca = pickle.load(fh)
-        reg_data_reduced = pd.DataFrame(pca.transform(reg_data_reduced))
+        reg_data = pd.DataFrame(pca.transform(reg_data))
 
         # Dimensionality Reduction based on accepted variance.
         ratios = np.array(pca.explained_variance_ratio_)
-        ratios = ratios[ratios.cumsum() <= (VARIANCE/100)]
+        ratios = ratios[ratios.cumsum() <= (BUCKET_VARIANCE/100)]
 
-        # Readjust the dimensions of 'reg_data_reduced' based on the variance we want.
+        # Readjust the dimensions of 'reg_data' based on the variance we want.
         length = len(ratios)
         if length > 0:
-            reg_data_reduced = reg_data_reduced[reg_data_reduced.columns[0:length]]
+            reg_data = reg_data[reg_data.columns[0:length]]
 
-    # Predict the buckets.
-    buckets_pred = classification_model_for_buckets.predict(reg_data_reduced)
-    reg_data_reduced['Bucket'] = buckets_pred
+    # Predict the buckets
+    buckets_pred = bucket_classification_model.predict(reg_data)
+    reg_data['Bucket'] = buckets_pred
 
-    # Fixed Ki range and Source Interval
-    ki_range = (-11.330603908176274, 17.19207365866807)
-    source_interval = (-5,5)
-
-    # Make predictions for all of the buckets. The large bucket is predict as 0. Only make predictions if the arrays aren't empty.
-    if reg_data_reduced[buckets_pred==0].size != 0:
-        sml_pred = regression_model_small_bucket.predict(reg_data_reduced[buckets_pred==0].iloc[:,:-1])
-        sml_pred = np.exp(np.interp(sml_pred, source_interval, ki_range))
-    if reg_data_reduced[buckets_pred==1].size != 0:
-        med_pred = regression_model_medium_bucket.predict(reg_data_reduced[buckets_pred==1].iloc[:,:-1])
-        med_pred = np.exp(np.interp(med_pred, source_interval, ki_range))
-    lrg_pred = np.zeros(np.count_nonzero(reg_data_reduced[buckets_pred==2]))
+    # Make predictions for all of the buckets.  The large bucket is predict as 0.  Only make predictions if the
+    #   arrays aren't empty.
+    if reg_data[buckets_pred==0].size != 0:
+        sml_pred = regression_model_small_bucket.predict(reg_data[buckets_pred==0].iloc[:,:-1])
+        sml_pred = np.exp(np.interp(sml_pred, SOURCE_INTERVAL, KI_RANGE))
+    if reg_data[buckets_pred==1].size != 0:
+        med_pred = regression_model_medium_bucket.predict(reg_data[buckets_pred==1].iloc[:,:-1])
+        med_pred = np.exp(np.interp(med_pred, SOURCE_INTERVAL, KI_RANGE))
+    lrg_pred = np.zeros(np.count_nonzero(reg_data[buckets_pred==2]))
 
     # Put back the predictions in the original order.
     y_predict_regression = np.array([])
@@ -181,11 +206,56 @@ def model_pipeline(allFeaturesData, ensemble=bool):
             y_predict_regression = np.append(y_predict_regression, lrg_pred[0])
             lrg_pred = np.delete(lrg_pred, 0)
 
-    reg_data['KI (nM) Predicted'] = y_predict_regression
+    return y_predict_regression
 
-    allFeaturesData = pd.merge(allFeaturesData,reg_data[['Seq','KI (nM) Predicted']],on='Seq', how='left')
+def regression_only_inference_pipeline(reg_data=pd.DataFrame()):
+    """
+    This function handles the regression only portion of the inference pipeline if we never had a 
+        classification stage in the pipeline.
+        
+    Parameters
+    ----------
+    reg_data: Pandas DataFrame containing the table of data for the various peptides in the positive
+        dataset.
 
-    # save result in a new dataframe
-    result = allFeaturesData[['Name','Seq','Predicted','KI (nM) Predicted']]
+    Regurns
+    -------
+    result: A single column containing the predicted KI values 
+    """
 
-    return result
+    ## MODEL IMPORTS
+    # MinMaxScaler Transformation
+    with open('Regression Only Dependencies/regression only scaler.pkl', 'rb') as fh:
+        regression_scaler = pickle.load(fh)
+
+    # sequential Forward Selection Features Selected
+    with open('Regression Only Dependencies/regression_only_selected_features.json', 'rb') as fh:
+        regression_features = json.loads(fh.read())
+
+    # Regression model
+    with open('Regression Only Dependencies/regression only SVR with RBF Kernel trained model.pkl', 'rb') as fh:
+        regression_model = pickle.load(fh)
+
+    # Scaler transformation and Feature Selection
+    reg_data = pd.DataFrame(regression_scaler.transform(reg_data.iloc[:,2:-1]),
+                                    columns = reg_data.columns[2:-1])[regression_features]
+    # Apply PCA if needed.
+    if REGRESSION_ONLY_VARIANCE != False:
+        with open('Regression Only Dependencies/PCA for SVR with RBF Kernel.pkl', 'rb') as fh:
+            pca = pickle.load(fh)
+        reg_data = pd.DataFrame(pca.transform(reg_data))
+
+        # Dimensionality Reduction based on accepted variance.
+        ratios = np.array(pca.explained_variance_ratio_)
+        ratios = ratios[ratios.cumsum() < (REGRESSION_ONLY_VARIANCE/100)]
+
+        # Readjust the dimensions of 'reg_data' based on the bariance we get.
+        length = len(ratios)
+        if length > 0:
+            reg_data = reg_data[reg_data.columns[0:length]]
+
+    # Predictions
+    y_pred = regression_model.predict(reg_data)
+    y_pred = np.exp(np.interp(y_pred, SOURCE_INTERVAL, KI_RANGE))
+
+    return y_pred

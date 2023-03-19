@@ -1,2 +1,2 @@
-,Name,Seq,Predicted,KI (nM) Predicted
-0,QSPLPERQE,QSPLPERQE,Positive,0.0
+,Name,Seq,Predicted,KI (nM) Predicted,KI (nM) Predicted (bucketized),KI (nM) Predicted (non-bucketized)
+0,QSPLPERQE,QSPLPERQE,Positive,0.0,0.0,5872.108643766303
