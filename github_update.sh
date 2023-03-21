@@ -40,4 +40,4 @@ git add smallhits.fasta.fai
 # .txt files
 git add requirements.txt
 
-git commit -m '3/18/2023 - finish making changes to the inference function to account for regression only pipeline'
+git commit -m '3/20/2023 - reverted to using Sequential Forward Selection for final models'

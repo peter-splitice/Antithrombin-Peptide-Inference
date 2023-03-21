@@ -9,7 +9,7 @@ import numpy as np
 
 # Change this global variable depending on what variance we choose for PCA.  Set this to 'False' if we don't end up using PCA.
 REGRESSION_ONLY_VARIANCE = 90
-BUCKET_VARIANCE = 90
+BUCKET_VARIANCE = False
 KI_RANGE = (-11.330603908176274, 17.19207365866807)
 SOURCE_INTERVAL = (-5,5)
 
@@ -49,30 +49,6 @@ def model_pipeline(allFeaturesData, ensemble=bool):
     # Selected features Classification
     with open('Classification Dependencies/Features for Classification Model.json') as fh:
         classification_features = json.loads(fh.read())
-
-    ## Regression Model Imports:
-    # Change the regression sections depending on whether or not you want to use Lasso Regression, SVR with 
-    # Linear Kernel, or SVR with RBF Kernel.
-    
-    # Scaler
-    with open('Regression Dependencies/Scaler Regression.pkl', 'rb') as fh:
-        scaler_for_regression = pickle.load(fh)
-
-    # Classification with ki
-    with open('Regression Dependencies/SVC with Linear Kernel trained model (rfe).pkl', 'rb') as fh:
-        classification_model_for_buckets = pickle.load(fh)
-
-    # Regression for Medium Bucket
-    with open('Regression Dependencies/SVR with RBF Kernel trained model medium bucket (rfe).pkl', 'rb') as fh:
-        regression_model_medium_bucket = pickle.load(fh)
-
-    # Regression for Small Bucket
-    with open('Regression Dependencies/SVR with RBF Kernel trained model small bucket (rfe).pkl', 'rb') as fh:
-        regression_model_small_bucket = pickle.load(fh)
-
-    # Selected features Regression
-    with open('Regression Dependencies/rfe_selected_features.json') as fh:      # Changed this to 'rfe selected features'
-        regression_features = json.loads(fh.read())
 
     ### CLASSIFICATION
     # ----------------------------------
@@ -131,11 +107,12 @@ def model_pipeline(allFeaturesData, ensemble=bool):
     reg_data['KI (nM) Predicted (non-bucketized)'] = y_predict_unbucketed
 
 
-    allFeaturesData = pd.merge(allFeaturesData,reg_data[['Seq','KI (nM) Predicted', 'KI (nM) Predicted (bucketized)',
-                                                         'KI (nM) Predicted (non-bucketized)']],on='Seq', how='left')
+    allFeaturesData = pd.merge(allFeaturesData,reg_data[['Seq', 'KI (nM) Predicted (bucketized)',
+                                                         'KI (nM) Predicted (non-bucketized)']],                                                     
+                               on='Seq', how='left')
 
     # save result in a new dataframe
-    result = allFeaturesData[['Name','Seq','Predicted','KI (nM) Predicted', 'KI (nM) Predicted (bucketized)',
+    result = allFeaturesData[['Name','Seq','Predicted', 'KI (nM) Predicted (bucketized)',
                               'KI (nM) Predicted (non-bucketized)']]
 
     return result
@@ -146,19 +123,20 @@ def bucket_regression_inference_pipeline(reg_data=pd.DataFrame()):
         regression_scaler = pickle.load(fh)
 
     # Classification with ki
-    with open('Regression Dependencies/SVC with Linear Kernel trained model (rfe).pkl', 'rb') as fh:
+    with open('Regression Dependencies/SVC RBF bucket classification trained.pkl', 'rb') as fh:
         bucket_classification_model = pickle.load(fh)
 
     # Regression for Medium Bucket
-    with open('Regression Dependencies/SVR with RBF Kernel trained model medium bucket (rfe).pkl', 'rb') as fh:
+    with open('Regression Dependencies/SVR RBF medium bucket Regression trained.pkl', 'rb') as fh:
         regression_model_medium_bucket = pickle.load(fh)
 
     # Regression for Small Bucket
-    with open('Regression Dependencies/SVR with RBF Kernel trained model small bucket (rfe).pkl', 'rb') as fh:
+    with open('Regression Dependencies/SVR RBF small bucket Regression trained.pkl', 'rb') as fh:
         regression_model_small_bucket = pickle.load(fh)
 
     # Selected features Regression
-    with open('Regression Dependencies/rfe_selected_features.json') as fh:      # Changed this to 'rfe selected features'
+    with open('Regression Dependencies/Features for Regression Model.json') as fh:      
+        # Changed this back to sequential forward selection.
         regression_features = json.loads(fh.read())
 
     # Apply preprocessing function and select only necessary features
