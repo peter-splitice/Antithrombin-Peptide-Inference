@@ -40,4 +40,4 @@ git add smallhits.fasta.fai
 # .txt files
 git add requirements.txt
 
-git commit -m '3/20/2023 - reverted to using Sequential Forward Selection for final models'
+git commit -m '3/27/2023 - did some extra tests'

@@ -5,6 +5,7 @@ from inference import *
 if __name__ == '__main__':
     pd.set_option('display.max_rows',None)
     inference('combined_hits.csv', ensemble=True)
+    inference('combined_hits.csv', ensemble=False)
     inference('APEADQTTPEEKPAEPEPVA', ensemble=True)
     inference('APEADQTTPEEKPAEPEPVA', ensemble=False)
     inference('QSPLPERQE', ensemble=True)
