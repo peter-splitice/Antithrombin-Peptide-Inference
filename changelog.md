@@ -57,3 +57,6 @@
 
 #### 3/17/2023 (Peter)
     1. Created new branch 'reg_only_update' that has updates for the regression only pipeline.  Merge the branches once regression only section is done.
+
+#### 3/31/2023 (Peter)
+    1. Changed the variance on the regression only model to 85%.

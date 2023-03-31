@@ -40,4 +40,4 @@ git add smallhits.fasta.fai
 # .txt files
 git add requirements.txt
 
-git commit -m '3/27/2023 - did some extra tests'
+git commit -m '3/30/2023 - Changed variance on the regression only model to 85'
