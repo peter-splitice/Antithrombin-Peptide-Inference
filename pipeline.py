@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np 
 
 # Change this global variable depending on what variance we choose for PCA.  Set this to 'False' if we don't end up using PCA.
-REGRESSION_ONLY_VARIANCE = 85
+REGRESSION_ONLY_VARIANCE = False
 BUCKET_VARIANCE = False
 KI_RANGE = (-11.330603908176274, 17.19207365866807)
 SOURCE_INTERVAL = (-5,5)
