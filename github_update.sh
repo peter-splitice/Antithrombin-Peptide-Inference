@@ -40,4 +40,4 @@ git add smallhits.fasta.fai
 # .txt files
 git add requirements.txt
 
-git commit -m '4/24/2023 - updated inference files to track new dataset provided the previous week'
+git commit -m '4/30/2023 - model dependencies with new cleaned data.'
