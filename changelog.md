@@ -60,3 +60,6 @@
 
 #### 3/31/2023 (Peter)
     1. Changed the variance on the regression only model to 85%.
+
+#### 5/1/2023 (Peter)
+    1. Changed the models for the Regression only dependencies with fixed data.

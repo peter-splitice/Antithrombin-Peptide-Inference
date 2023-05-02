@@ -40,4 +40,4 @@ git add smallhits.fasta.fai
 # .txt files
 git add requirements.txt
 
-git commit -m '4/30/2023 - model dependencies with new cleaned data.'
+git commit -m '5/1/2023 - model dependencies with new cleaned data.'
