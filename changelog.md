@@ -63,3 +63,6 @@
 
 #### 5/1/2023 (Peter)
     1. Changed the models for the Regression only dependencies with fixed data.
+
+#### 5/3/2023 (Peter)
+    1. Retrained the model to exclude any peptides with KI values > 4000
