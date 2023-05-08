@@ -32,6 +32,7 @@ git add smallhits.fasta
 git add combined_hits.csv
 git add single_results.csv
 git add sorted_peptides.csv
+git add medoid_peptides.csv
 
 # .fai files
 git add longhits.fasta.fai
@@ -40,4 +41,4 @@ git add smallhits.fasta.fai
 # .txt files
 git add requirements.txt
 
-git commit -m '5/3/2023 - redid the model to train excluding KI values > 4000.'
+git commit -m '5/5/2023 - redid the model to train excluding KI values > 4000.'

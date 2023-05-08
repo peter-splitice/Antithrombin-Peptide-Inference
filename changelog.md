@@ -66,3 +66,6 @@
 
 #### 5/3/2023 (Peter)
     1. Retrained the model to exclude any peptides with KI values > 4000
+
+#### 5/5/2023 (Peter)
+    1. Reran inference function on new file.
