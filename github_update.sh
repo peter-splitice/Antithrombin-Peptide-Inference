@@ -41,4 +41,4 @@ git add smallhits.fasta.fai
 # .txt files
 git add requirements.txt
 
-git commit -m '5/5/2023 - redid the model to train excluding KI values > 4000.'
+git commit -m '5/7/2023 - updated classification models and removed ensemble model'

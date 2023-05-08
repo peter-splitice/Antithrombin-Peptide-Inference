@@ -69,3 +69,7 @@
 
 #### 5/5/2023 (Peter)
     1. Reran inference function on new file.
+
+#### 5/7/2023 (Nivedha)
+    1. Changed the threshold level from 0.25 to 0.4 (line 65 on pipeline.py)
+    2. Removed ensemble functionality

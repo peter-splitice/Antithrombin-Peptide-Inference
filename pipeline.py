@@ -14,7 +14,7 @@ KI_RANGE = (-11.330603908176274, 17.19207365866807)
 SOURCE_INTERVAL = (-5,5)
 
 ## Pipeline for multi-stage model:
-def model_pipeline(allFeaturesData, ensemble=bool):
+def model_pipeline(allFeaturesData):
     """
     Function for the multistage pipeline.  The following stages are applied:
         - Classification of the peptides.  Positive classification means efficacy in antithrombin response.
@@ -38,13 +38,9 @@ def model_pipeline(allFeaturesData, ensemble=bool):
     with open('Classification Dependencies/Scaler Classification.pkl', 'rb') as fh:
         scaler_for_classification = pickle.load(fh)
 
-    # First Model
+    # Trained Classification Model
     with open('Classification Dependencies/SVM Linear Classification trained.pkl', 'rb') as fh:
         classification_model_1 = pickle.load(fh)
-    
-    # Second Model
-    with open('Classification Dependencies/SVM RBF Classification trained.pkl', 'rb') as fh:
-        classification_model_2 = pickle.load(fh)
 
     # Selected features Classification
     with open('Classification Dependencies/Features for Classification Model.json') as fh:
@@ -62,31 +58,18 @@ def model_pipeline(allFeaturesData, ensemble=bool):
 
     # Model 1 - Applying threshold on decision function
     decisionFuctionModel1 = classification_model_1.decision_function(clf_data)
-    threshold = 0.25
-    y_predict_model_1 = []
+    threshold = 0.4
+
+    y_predict = []
     for j in decisionFuctionModel1:
         if j > threshold:
-            y_predict_model_1.append(1)
+            y_predict.append(1)
         else:
-            y_predict_model_1.append(0)
+            y_predict.append(0)
 
-    # Model 2
-    y_predict_model_2 = classification_model_2.predict(clf_data)
-
-    # Ensemble Model Prediction.  If the flag is set to 'True', we combine results of SVC with RBF + Linear Kernels.
-    if ensemble==True:
-        y_predict_ensemble = []
-        for i in range(len(y_predict_model_1)):
-            if (y_predict_model_1[i] == 1) & (y_predict_model_2[i] == 1):
-                y_predict_ensemble.append('Positive')
-            else:
-                y_predict_ensemble.append('Negative')
-        allFeaturesData = pd.concat([allFeaturesData, pd.DataFrame(y_predict_ensemble, columns=["Predicted"])], axis=1)
-
-    elif ensemble==False:
-        predictions_model_2 =  pd.DataFrame(y_predict_model_2, columns=["Predicted"])
-        predictions_model_2.replace({1:'Positive',0:'Negative'}, inplace=True)
-        allFeaturesData = pd.concat([allFeaturesData, predictions_model_2], axis=1)
+    predictions =  pd.DataFrame(y_predict, columns=["Predicted"])
+    predictions.replace({1:'Positive',0:'Negative'}, inplace=True)
+    allFeaturesData = pd.concat([allFeaturesData, predictions], axis=1)
     
     ### REGRESSION
     # ----------------------------------

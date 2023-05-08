@@ -20,15 +20,13 @@ import glob
 from pipeline import *
 
 ## Inference Function for Fasta File:
-def inferenceFasta(fastafile, ensemble=True):  
+def inferenceFasta(fastafile):  
     """
     Performs inference on a single .fasta file.
 
     Parameters
     ----------
     fastafile: String with the name of a .fasta file requiring inference.
-
-    ensemble: Boolean flag determing whether or not to use an ensemble method for classification.
 
     Returns
     -------
@@ -88,20 +86,18 @@ def inferenceFasta(fastafile, ensemble=True):
         # create dataframe using all extracted features and the names
         allFeaturesData = pd.DataFrame(allFeaturesData, columns = featuresFlattenList)
         
-        result = model_pipeline(allFeaturesData, ensemble)
+        result = model_pipeline(allFeaturesData)
 
         return result
 
 ## Inference Function for Single Sequences:
-def inferenceSingleSeqence(seq, ensemble=True):
+def inferenceSingleSeqence(seq):
     """ 
     Performs inference on a single sequence.
     
     Parameters
     ----------
     seq: String with the name of a single peptide sequence.
-
-    ensemble: Boolean flag determing whether or not to use an ensemble method for classification.
 
     Returns
     -------
@@ -154,20 +150,18 @@ def inferenceSingleSeqence(seq, ensemble=True):
     # create dataframe using all extracted features and the names
     allFeaturesData = pd.DataFrame(allFeaturesData, columns = flatten_list)
 
-    result = model_pipeline(allFeaturesData, ensemble)
+    result = model_pipeline(allFeaturesData)
 
     return result
 
 ## Inference Function for .csv Files:
-def inference_csv(csv, ensemble=True):
+def inference_csv(csv):
     """
     Performs inference on every peptide within a csv file.
 
     Parameters
     ----------
     csv: String with the name of a .csv file requiring inference.
-
-    ensemble: Boolean flag determing whether or not to use an ensemble method for classification.
 
     Returns
     -------
@@ -224,30 +218,21 @@ def inference_csv(csv, ensemble=True):
     # create dataframe using all extracted features and the names
     sequence_data = pd.DataFrame(sequence_data, columns = featuresFlattenList)
 
-    result = model_pipeline(sequence_data, ensemble)
+    result = model_pipeline(sequence_data)
 
     return result
 
 ## Implementation Function:
-def inference(file=str, ensemble=True):
+def inference(file=str):
     if file.endswith('.fasta') == True:
-        result = inferenceFasta(file, ensemble)
+        result = inferenceFasta(file)
         name = file.split(sep='.')[0]
-        if ensemble==True:
-            result.to_csv('Results/%s_fasta_results_ensemble.csv' %(name))
-        else:
-            result.to_csv('Results/%s_fasta_results.csv' %(name))
+        result.to_csv('Results/%s_fasta_results.csv' %(name))
     elif file.endswith('.csv') == True:
-        result = inference_csv(file, ensemble)
+        result = inference_csv(file)
         name = file.split(sep='.')[0]
-        if ensemble==True:
-            result.to_csv('Results/%s_csv_results_ensemble.csv' %(name))
-        else:
-            result.to_csv('Results/%s_csv_results.csv' %(name))
+        result.to_csv('Results/%s_csv_results.csv' %(name))
     else:
-        result = inferenceSingleSeqence(file, ensemble)
-        if ensemble==True:
-            result.to_csv('Results/%s_results.csv' %(file))
-        else:
-            result.to_csv('Results/%s_results.csv' %(file))
+        result = inferenceSingleSeqence(file)
+        result.to_csv('Results/%s_results.csv' %(file))
     return result
